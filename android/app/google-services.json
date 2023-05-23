@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "329397378364",
+    "project_id": "cse-book-recommendation",
+    "storage_bucket": "cse-book-recommendation.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:329397378364:android:e94337a4f9d42404579239",
+        "android_client_info": {
+          "package_name": "com.example.cse_book_recommendation"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "329397378364-jl75kqg12ue8l963rumitv1qsm3as8pa.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCoFBep1HutvyYPbeP-sjTkx8dWK3lsV8c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "329397378364-jl75kqg12ue8l963rumitv1qsm3as8pa.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
