@@ -41,7 +41,7 @@ class _SearchPageState extends State<SearchPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).primaryColor,
+        backgroundColor: Theme.of(context).colorScheme.primary,
         title: Card(
           child: TextField(
             controller: _searchController,
@@ -56,6 +56,7 @@ class _SearchPageState extends State<SearchPage> {
             },
           ),
         ),
+        
       ),
       body: _books.isEmpty
           ? Center(

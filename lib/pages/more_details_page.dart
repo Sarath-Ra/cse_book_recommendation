@@ -35,7 +35,8 @@ class MoreDetailsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          backgroundColor: Theme.of(context).primaryColor,
+          backgroundColor: Theme.of(context).colorScheme.primary,
+          foregroundColor: Colors.amber,
           title: Text(
             "BOOK DETAILS",
           ),

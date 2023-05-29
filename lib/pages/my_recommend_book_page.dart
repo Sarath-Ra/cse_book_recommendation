@@ -13,6 +13,8 @@ class _MyRecommendBookPageState extends State<MyRecommendBookPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Colors.amber,
         title: const Text('Book-Recommendation'),
         actions: [
           IconButton(
@@ -20,7 +22,7 @@ class _MyRecommendBookPageState extends State<MyRecommendBookPage> {
                 FirebaseAuth.instance.signOut();
               },
               icon: Icon(Icons.exit_to_app,
-                  color: Theme.of(context).colorScheme.primary))
+                  color: Colors.amber))
         ],
       ),
       body: Center(child: Text('My Recommend Page')),

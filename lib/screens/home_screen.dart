@@ -84,7 +84,7 @@ class _HomePageState extends State<HomePage> {
           topLeft: Radius.circular(40), topRight: Radius.circular(40)),
       child: BottomNavigationBar(
         onTap: _selectPage,
-        backgroundColor: Theme.of(context).primaryColor,
+        backgroundColor: Theme.of(context).colorScheme.primary,
         unselectedItemColor: Colors.amber,
         selectedItemColor: Colors.white,
         currentIndex: _selectedPageIndex,
@@ -124,6 +124,7 @@ class _HomePageState extends State<HomePage> {
                   ? MyRecommendBookPage()
                   : ProfilePage(),
       bottomNavigationBar: bottomNavigationBar,
+      
     );
   }
 }
