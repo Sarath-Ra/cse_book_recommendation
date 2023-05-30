@@ -105,6 +105,7 @@ class _SearchPageState extends State<SearchPage> {
                       if(image != null) {
                         imageRef = book['volumeInfo']['imageLinks']['thumbnail'];
                       }
+                      // search page issue resolved
                       final title = book['volumeInfo']['title'];
                       final edition =
                           'Edition: ${book['volumeInfo']['edition'] ?? 'N/A'}';
