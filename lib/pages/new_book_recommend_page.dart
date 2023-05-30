@@ -131,7 +131,7 @@ class _NewRecommendScreenState extends State<NewRecommendScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Book-Recommendation'),
+        title: Center(child: const Text('Book-Recommendation')),
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Colors.amber,
         actions: [
@@ -150,9 +150,14 @@ class _NewRecommendScreenState extends State<NewRecommendScreen> {
             const SizedBox(
               height: 30,
             ),
-            const Text(
-              "Recommend New Book!",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            Row(
+              children: [
+                SizedBox(width: 20,),
+                const Text(
+                  "Recommend New Book",
+                  style: TextStyle(fontSize: 30, fontWeight: FontWeight.w400),
+                ),
+              ],
             ),
             const SizedBox(
               height: 10,
