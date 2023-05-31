@@ -5,6 +5,7 @@ import '../pages/my_recommend_book_page.dart';
 import '../pages/new_book_recommend_page.dart';
 import '../pages/profile_page.dart';
 import '../pages/search_book.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -14,6 +15,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+
   final user = FirebaseAuth.instance.currentUser!;
 
   final List<String> titleName = ['Home', 'Search', 'Profile'];

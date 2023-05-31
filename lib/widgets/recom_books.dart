@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
 
-import '../pages/full_details.dart';
+import '../pages/admin_home_page.dart';
 
 class RecomBooks extends StatelessWidget {
   String name;

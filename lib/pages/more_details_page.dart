@@ -133,7 +133,8 @@ class MoreDetailsPage extends StatelessWidget {
                   'authorName': author,
                   'price': price,
                   'edition': edition,
-                  'email': user.email
+                  'email': user.email,
+                  'createdAt': Timestamp.now(),
                 });
                 showDialog(
                     context: context,

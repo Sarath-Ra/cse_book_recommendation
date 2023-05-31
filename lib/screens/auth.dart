@@ -3,6 +3,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+import '../pages/forgot_password.dart';
 
 final _firebase = FirebaseAuth.instance;
 
@@ -47,12 +50,17 @@ class _AuthScreenState extends State<AuthScreen> {
         final userCredentials = await _firebase.createUserWithEmailAndPassword(
             email: _enteredEmail, password: _enteredPassword);
 
+        var role = 'user';
+        if (_enteredEmail == 'hod.cse@psgtech.ac.in') {
+          role = 'admin';
+        }
         await FirebaseFirestore.instance
             .collection('users')
             .doc(userCredentials.user!.uid)
             .set({
           'username': _enteredUsername,
           'email': _enteredEmail,
+          'role': role
         });
       }
       setState(() {
@@ -82,13 +90,32 @@ class _AuthScreenState extends State<AuthScreen> {
         child: SingleChildScrollView(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             children: [
               Container(
                 margin:
-                    EdgeInsets.only(top: 30, bottom: 20, left: 20, right: 20),
+                    EdgeInsets.only(top: 30, left: 20, right: 20),
                 width: 200,
-                child: Image.asset('assets/image/chat.png'),
+                child: Image.asset('assets/image/book.png'),
               ),
+              
+                Text(
+                  "CSE",
+                  style: GoogleFonts.bebasNeue(
+                      fontSize: 54, fontWeight: FontWeight.bold),
+                ),
+                
+                Text(
+                  "Hello Again!",
+                  style: GoogleFonts.bebasNeue(
+                    fontSize: 54,
+                  ),
+                ),
+                Text(
+                  "Recommend a New Book",
+                  style: TextStyle(fontSize: 20),
+                ),
+                
               Card(
                 margin: const EdgeInsets.all(20),
                 child: SingleChildScrollView(
@@ -97,6 +124,7 @@ class _AuthScreenState extends State<AuthScreen> {
                     child: Form(
                       key: _formKey,
                       child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           TextFormField(
@@ -118,20 +146,21 @@ class _AuthScreenState extends State<AuthScreen> {
                             },
                           ),
                           if (!_isLogin)
-                          TextFormField(
-                            decoration: InputDecoration(labelText: 'Username'),
-                            enableSuggestions: false,
-                            // autocorrect: false,
-                            validator: (value) {
-                              if (value == null || value.trim().length < 4) {
-                                return 'Please enter at least 4 characters.';
-                              }
-                              return null;
-                            },
-                            onSaved: (value) {
-                              _enteredUsername = value!;
-                            },
-                          ),
+                            TextFormField(
+                              decoration:
+                                  InputDecoration(labelText: 'Username'),
+                              enableSuggestions: false,
+                              // autocorrect: false,
+                              validator: (value) {
+                                if (value == null || value.trim().length < 4) {
+                                  return 'Please enter at least 4 characters.';
+                                }
+                                return null;
+                              },
+                              onSaved: (value) {
+                                _enteredUsername = value!;
+                              },
+                            ),
                           TextFormField(
                             decoration: InputDecoration(labelText: 'Password'),
                             obscureText: true,
@@ -148,6 +177,30 @@ class _AuthScreenState extends State<AuthScreen> {
                           const SizedBox(
                             height: 12,
                           ),
+                          if (_isLogin)
+                          Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      GestureDetector(
+                          onTap: () {
+                            Navigator.push(context,
+                                MaterialPageRoute(builder: (context) {
+                              return ForgotPasswordPage();
+                            }));
+                          },
+                          child: Text(
+                            "Forgot Password",
+                            style: TextStyle(
+                                color: Theme.of(context).colorScheme.primary,
+                                fontWeight: FontWeight.bold),
+                          )),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 12,),
+
                           if (_isAuthenticating)
                             const CircularProgressIndicator(),
                           if (!_isAuthenticating)
@@ -158,12 +211,10 @@ class _AuthScreenState extends State<AuthScreen> {
                                         .colorScheme
                                         .primaryContainer),
                                 child: Text(_isLogin ? 'Login' : 'Sign up')),
-                                
                           if (!_isAuthenticating)
                             TextButton(
                                 onPressed: () {
                                   setState(() {
-                                    
                                     _isLogin = !_isLogin;
                                   });
                                 },
@@ -176,6 +227,7 @@ class _AuthScreenState extends State<AuthScreen> {
                   ),
                 ),
               ),
+              
             ],
           ),
         ),

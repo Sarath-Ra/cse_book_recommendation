@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 
 class NewRecommendScreen extends StatefulWidget {
@@ -11,6 +12,42 @@ class NewRecommendScreen extends StatefulWidget {
 }
 
 class _NewRecommendScreenState extends State<NewRecommendScreen> {
+  void setUpPushNotification() async {
+    final fcm = FirebaseMessaging.instance;
+
+    // final notoficationSettings =
+    await fcm.requestPermission();
+
+    final token = await fcm.getToken();
+    print(token);
+
+    final user = FirebaseAuth.instance.currentUser!;
+
+    var docid = user.uid;
+
+    final adminUser = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .get();
+
+    if (adminUser.data()!['role'] == 'admin') {
+      docid = 'admin';
+    }
+
+    await FirebaseFirestore.instance
+        .collection('fcm')
+        .doc(docid)
+        .set({'token': token});
+
+    // fcm.subscribeToTopic('chat');
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    setUpPushNotification();
+  }
+
   var _isSubmitting = false;
 
   final _newBookNameController = TextEditingController();
@@ -115,12 +152,12 @@ class _NewRecommendScreenState extends State<NewRecommendScreen> {
     });
 
     showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          content: Text("New Book Recommended !!"),
-        );
-      });
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            content: Text("New Book Recommended !!"),
+          );
+        });
 
     // setState(() {
     //   _isSubmitting = false;
@@ -139,8 +176,7 @@ class _NewRecommendScreenState extends State<NewRecommendScreen> {
               onPressed: () {
                 FirebaseAuth.instance.signOut();
               },
-              icon: Icon(Icons.exit_to_app,
-                  color: Colors.amber))
+              icon: Icon(Icons.exit_to_app, color: Colors.amber))
         ],
       ),
       body: SingleChildScrollView(
@@ -152,7 +188,9 @@ class _NewRecommendScreenState extends State<NewRecommendScreen> {
             ),
             Row(
               children: [
-                SizedBox(width: 20,),
+                SizedBox(
+                  width: 20,
+                ),
                 const Text(
                   "Recommend New Book",
                   style: TextStyle(fontSize: 30, fontWeight: FontWeight.w400),
