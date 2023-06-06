@@ -1,6 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cse_book_recommendation/widgets/saved_books.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+import '../widgets/recom_books.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -10,38 +14,33 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  Future<DocumentSnapshot<Map<String, dynamic>>> fetchUserData() async {
+  var uname = '';
+  var uemail = '';
+  void fetchUserData() async {
     User? currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser != null) {
-      DocumentSnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore
-          .instance
+      final snapshot = await FirebaseFirestore.instance
           .collection('users')
           .doc(currentUser.uid)
           .get();
-      return snapshot;
+
+      setState(() {
+        uname = snapshot.data()!['username'];
+        uemail = snapshot.data()!['email'];
+      });
     }
-    throw Exception('User not logged in');
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    fetchUserData();
   }
 
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser!;
-    return FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-      future: fetchUserData(),
-      builder: (BuildContext context,
-          AsyncSnapshot<DocumentSnapshot<Map<String, dynamic>>> snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError) {
-          return Text('Error: ${snapshot.error}');
-        } else if (!snapshot.hasData) {
-          return Text('No data available');
-        }
-
-        // Data is available, extract the username and email
-        String username = snapshot.data!.get('username') ?? '';
-        String email = snapshot.data!.get('email') ?? '';
-
+    final user = FirebaseAuth.instance.currentUser;
         return Scaffold(
           appBar: AppBar(
             backgroundColor: Theme.of(context).colorScheme.primary,
@@ -57,145 +56,143 @@ class _ProfilePageState extends State<ProfilePage> {
             ],
           ),
           body: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    SizedBox(height: 20),
-                    CircleAvatar(
+              const SizedBox(
+            height: 30,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(
+                width: 20,
+              ),
+              const Text(
+                "Profile",
+                style: TextStyle(fontSize: 40, fontWeight: FontWeight.w400),
+              ),
+            ],
+          ),
+          const SizedBox(
+            height: 5,
+          ),
+          CircleAvatar(
                       radius: 50,
                       backgroundImage: AssetImage(
                           'assets/image/profile_image.png'), // Replace with your own image
                     ),
                     SizedBox(height: 10),
                     Text(
-                      username,
+                      uname,
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     Text(
-                      email,
+                      uemail,
                       style: TextStyle(
                         fontSize: 16,
                         color: Colors.grey,
                       ),
                     ),
-                    SizedBox(height: 20),
-                    Text(
-                      'Favorite Books',
-                      style: TextStyle(
-                        fontSize: 30,
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
                     SizedBox(height: 10),
-                    // ListView.builder(
-                    //   shrinkWrap: true,
-                    //   physics: NeverScrollableScrollPhysics(),
-                    //   itemCount: favoriteBooks.length,
-                    //   itemBuilder: (context, index) {
-                    //     return ListTile(
-                    //       leading: Icon(Icons.book),
-                    //       title: Text(favoriteBooks[index]),
-                    //     );
-                    //   },
-                    // ),
-                  ],
+                    Text(
+                  "Saved!",
+                  style: GoogleFonts.bebasNeue(
+                    fontSize: 54,
+                  ),
                 ),
-              ),
-              Expanded(
-                child: StreamBuilder(
-                  stream: FirebaseFirestore.instance
-                      .collection('favourites')
-                      .orderBy('createdAt', descending: true)
-                      .snapshots(),
-                  builder: (ctx, bookSnapshots) {
-                    if (bookSnapshots.connectionState ==
-                        ConnectionState.waiting) {
-                      return const Center(
-                        child: CircularProgressIndicator(),
-                      );
-                    }
+                Expanded(
+            child: StreamBuilder(
+              stream: FirebaseFirestore.instance
+                  .collection('favourites')
+                  .orderBy('createdAt', descending: true)
+                  .snapshots(),
+              builder: (ctx, bookSnapshots) {
+                if (bookSnapshots.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
 
-                    if (!bookSnapshots.hasData ||
-                        bookSnapshots.data!.docs.isEmpty) {
-                      return const Center(
-                        child: Text('No favourites found...'),
-                      );
-                    }
+                if (!bookSnapshots.hasData ||
+                    bookSnapshots.data!.docs.isEmpty) {
+                  return const Center(
+                    child: Text('No Recommendation found.'),
+                  );
+                }
 
-                    if (bookSnapshots.hasError) {
-                      return const Center(
-                        child: Text('Something went wrong...'),
-                      );
-                    }
+                if (bookSnapshots.hasError) {
+                  return const Center(
+                    child: Text('Something went wrong...'),
+                  );
+                }
 
-                    final loadedBooks = bookSnapshots.data!.docs;
+                final loadedBooks = bookSnapshots.data!.docs;
 
-                    if (loadedBooks.isEmpty) {
-                      return Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.recommend,
-                              size: 100,
-                              color: Colors.grey[600],
-                            ),
-                            Container(
-                                width: MediaQuery.of(context).size.width * 0.85,
-                                height: 100,
-                                child: Align(
-                                  alignment: Alignment.center,
-                                  child: Text(
-                                    'Recommend new books to enhance the regulation book',
-                                    style: TextStyle(
-                                        color: Colors.grey[600], fontSize: 20),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                )),
-                            Text(
-                              'My recommendations',
-                              style: TextStyle(
-                                  color: Theme.of(context).colorScheme.primary,
-                                  fontSize: 15),
-                            ),
-                          ],
+                if (loadedBooks.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.recommend,
+                          size: 100,
+                          color: Colors.grey[600],
                         ),
+                        Container(
+                            width: MediaQuery.of(context).size.width * 0.85,
+                            height: 100,
+                            child: Align(
+                              alignment: Alignment.center,
+                              child: Text(
+                                'Save books for later reference',
+                                style: TextStyle(
+                                    color: Colors.grey[600], fontSize: 20),
+                                textAlign: TextAlign.center,
+                              ),
+                            )),
+                        Text(
+                          'Saved books',
+                          style: TextStyle(
+                              color: Theme.of(context).colorScheme.primary,
+                              fontSize: 15),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                return ListView.builder(
+                  itemCount: loadedBooks.length,
+                  itemBuilder: (ctx, index) {
+                    final book = loadedBooks[index].data();
+
+                    final sameUser = user!.uid == book['uid'];
+
+                    Timestamp timestamp = book['createdAt'];
+                    DateTime dateTime = timestamp.toDate();
+                    String formattedDate =
+                        "${dateTime.day}/${dateTime.month}/${dateTime.year}";
+                    String formattedTime =
+                        "${dateTime.hour}:${dateTime.minute}:${dateTime.second}";
+
+                    if (sameUser) {
+                      return SavedBooks(
+                        newbook: book['bName'],
+                        author: book['authorName'],
+                        price: book['price'],
+                        edition: book['edition'],
+                        date: formattedDate,
+                        time: formattedTime,
+                        imageUrl: book['imageUrl'],
                       );
                     }
-
-                    return ListView.builder(
-                      itemCount: loadedBooks.length,
-                      itemBuilder: (ctx, index) {
-                        final book = loadedBooks[index].data();
-
-                        final sameUser = user.uid == book['userId'];
-  
-                        Timestamp timestamp = book['createdAt'];
-                        DateTime dateTime = timestamp.toDate();
-                        String formattedDate =
-                            "${dateTime.day}/${dateTime.month}/${dateTime.year}";
-                        String formattedTime =
-                            "${dateTime.hour}:${dateTime.minute}:${dateTime.second}";
-
-                        if (sameUser) {
-                          Container(
-                            height: 200,
-                            width: 200,
-                            child: Card(),
-                          );
-                        }
-                      },
-                    );
                   },
-                ),
-              )
+                );
+              },
+            ),
+          ),
             ],
           ),
           floatingActionButton: Container(
@@ -223,7 +220,6 @@ class _ProfilePageState extends State<ProfilePage> {
           floatingActionButtonLocation:
               FloatingActionButtonLocation.centerFloat,
         );
-      },
-    );
+      }
   }
-}
+
