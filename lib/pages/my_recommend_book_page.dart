@@ -11,7 +11,35 @@ class MyRecommendBookPage extends StatefulWidget {
 }
 
 class _MyRecommendBookPageState extends State<MyRecommendBookPage> {
-  final user = FirebaseAuth.instance.currentUser!;
+  final user = FirebaseAuth.instance.currentUser;
+  var yesy = 1;
+
+  void getBooks() async {
+    final FirebaseFirestore _db = FirebaseFirestore.instance;
+    final user = FirebaseAuth.instance.currentUser;
+    final CollectionReference _usersRef = _db.collection('newbook');
+    final Query _query = _usersRef.where('userId', isEqualTo: user!.uid.toString());
+
+    _query.get().then((QuerySnapshot querySnapshot) {
+      if (querySnapshot.size > 0) {
+        setState(() {
+          yesy = 0;
+        });
+      } else {
+        print('No documents found.');
+      }
+    }).catchError((error) {
+      print('Error getting document(s): $error');
+    });
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getBooks();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -50,7 +78,7 @@ class _MyRecommendBookPageState extends State<MyRecommendBookPage> {
           Expanded(
             child: StreamBuilder(
               stream: FirebaseFirestore.instance
-                  .collection('NewBook')
+                  .collection('newbook')
                   .orderBy('createdAt', descending: true)
                   .snapshots(),
               builder: (ctx, bookSnapshots) {
@@ -75,7 +103,7 @@ class _MyRecommendBookPageState extends State<MyRecommendBookPage> {
 
                 final loadedBooks = bookSnapshots.data!.docs;
 
-                if (loadedBooks.isEmpty) {
+                if (yesy == 1) {
                   return Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -113,7 +141,7 @@ class _MyRecommendBookPageState extends State<MyRecommendBookPage> {
                   itemBuilder: (ctx, index) {
                     final book = loadedBooks[index].data();
 
-                    final sameUser = user.uid == book['userId'];
+                    final sameUser = user!.uid == book['userId'];
 
                     Timestamp timestamp = book['createdAt'];
                     DateTime dateTime = timestamp.toDate();

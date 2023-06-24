@@ -16,6 +16,28 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   var uname = '';
   var uemail = '';
+  var yes = 1;
+
+  void getbooks() async {
+    final FirebaseFirestore _db = FirebaseFirestore.instance;
+    final user = FirebaseAuth.instance.currentUser!;
+    final CollectionReference _usersRef = _db.collection('favourites');
+    final Query _query =
+        _usersRef.where('uid', isEqualTo: user.uid.toString());
+
+    _query.get().then((QuerySnapshot querySnapshot) {
+      if (querySnapshot.size > 0) {
+        setState(() {
+          yes = 0;
+        });
+      } else {
+        print('No documents found.');
+      }
+    }).catchError((error) {
+      print('Error getting document(s): $error');
+    });
+  }
+
   void fetchUserData() async {
     User? currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser != null) {
@@ -36,28 +58,29 @@ class _ProfilePageState extends State<ProfilePage> {
     // TODO: implement initState
     super.initState();
     fetchUserData();
+    getbooks();
   }
 
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
-        return Scaffold(
-          appBar: AppBar(
-            backgroundColor: Theme.of(context).colorScheme.primary,
-            foregroundColor: Colors.amber,
-            title: Center(child: const Text('Book-Recommendation')),
-            actions: [
-              IconButton(
-                onPressed: () {
-                  FirebaseAuth.instance.signOut();
-                },
-                icon: Icon(Icons.exit_to_app, color: Colors.amber),
-              )
-            ],
-          ),
-          body: Column(
-            children: [
-              const SizedBox(
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Colors.amber,
+        title: Center(child: const Text('Book-Recommendation')),
+        actions: [
+          IconButton(
+            onPressed: () {
+              FirebaseAuth.instance.signOut();
+            },
+            icon: Icon(Icons.exit_to_app, color: Colors.amber),
+          )
+        ],
+      ),
+      body: Column(
+        children: [
+          const SizedBox(
             height: 30,
           ),
           Row(
@@ -76,33 +99,33 @@ class _ProfilePageState extends State<ProfilePage> {
             height: 5,
           ),
           CircleAvatar(
-                      radius: 50,
-                      backgroundImage: AssetImage(
-                          'assets/image/profile_image.png'), // Replace with your own image
-                    ),
-                    SizedBox(height: 10),
-                    Text(
-                      uname,
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Text(
-                      uemail,
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey,
-                      ),
-                    ),
-                    SizedBox(height: 10),
-                    Text(
-                  "Saved!",
-                  style: GoogleFonts.bebasNeue(
-                    fontSize: 54,
-                  ),
-                ),
-                Expanded(
+            radius: 50,
+            backgroundImage: AssetImage(
+                'assets/image/profile_image.png'), // Replace with your own image
+          ),
+          SizedBox(height: 10),
+          Text(
+            uname,
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          Text(
+            uemail,
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey,
+            ),
+          ),
+          SizedBox(height: 10),
+          Text(
+            "Saved!",
+            style: GoogleFonts.bebasNeue(
+              fontSize: 54,
+            ),
+          ),
+          Expanded(
             child: StreamBuilder(
               stream: FirebaseFirestore.instance
                   .collection('favourites')
@@ -118,7 +141,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 if (!bookSnapshots.hasData ||
                     bookSnapshots.data!.docs.isEmpty) {
                   return const Center(
-                    child: Text('No Recommendation found.'),
+                    child: Text('No Favourites found.'),
                   );
                 }
 
@@ -130,7 +153,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
                 final loadedBooks = bookSnapshots.data!.docs;
 
-                if (loadedBooks.isEmpty) {
+                if (yes == 1) {
                   return Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -193,33 +216,31 @@ class _ProfilePageState extends State<ProfilePage> {
               },
             ),
           ),
-            ],
-          ),
-          floatingActionButton: Container(
-              width: 110,
-              child: FloatingActionButton(
-                  onPressed: () {
-                    FirebaseAuth.instance.signOut();
-                  },
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Logout',
-                        style: TextStyle(
-                            fontSize: 18,
-                            color: Theme.of(context).colorScheme.primary),
-                      ),
-                      SizedBox(width: 10),
-                      Icon(
-                        Icons.logout,
-                        color: Theme.of(context).colorScheme.primary,
-                      )
-                    ],
-                  ))),
-          floatingActionButtonLocation:
-              FloatingActionButtonLocation.centerFloat,
-        );
-      }
+        ],
+      ),
+      floatingActionButton: Container(
+          width: 110,
+          child: FloatingActionButton(
+              onPressed: () {
+                FirebaseAuth.instance.signOut();
+              },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Logout',
+                    style: TextStyle(
+                        fontSize: 18,
+                        color: Theme.of(context).colorScheme.primary),
+                  ),
+                  SizedBox(width: 10),
+                  Icon(
+                    Icons.logout,
+                    color: Theme.of(context).colorScheme.primary,
+                  )
+                ],
+              ))),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+    );
   }
-
+}

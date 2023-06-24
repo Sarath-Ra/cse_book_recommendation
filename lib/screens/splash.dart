@@ -7,7 +7,7 @@ class SplashScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Thabaal'),
+        title: const Text('cse-book-recommendation'),
       ),
       body: const Center(
         child: Text('Loading'),

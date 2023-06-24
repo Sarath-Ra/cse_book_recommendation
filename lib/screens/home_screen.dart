@@ -33,19 +33,19 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  Future<CollectionReference<Map<String, dynamic>>> getSubColl() async {
-    CollectionReference _reference =
-        FirebaseFirestore.instance.collection('userCollection');
-    QuerySnapshot<Object?> querySnapshot = await _reference
-        .where('email', isEqualTo: FirebaseAuth.instance.currentUser!.email)
-        .get();
-    DocumentReference<Object?> userRef = querySnapshot.docs[0].reference;
-    CollectionReference<Map<String, dynamic>> userSubcollection =
-        userRef.collection('myrecomm');
-    _reference = userSubcollection;
+  // Future<CollectionReference<Map<String, dynamic>>> getSubColl() async {
+  //   CollectionReference _reference =
+  //       FirebaseFirestore.instance.collection('userCollection');
+  //   QuerySnapshot<Object?> querySnapshot = await _reference
+  //       .where('email', isEqualTo: FirebaseAuth.instance.currentUser!.email)
+  //       .get();
+  //   DocumentReference<Object?> userRef = querySnapshot.docs[0].reference;
+  //   CollectionReference<Map<String, dynamic>> userSubcollection =
+  //       userRef.collection('myrecomm');
+  //   _reference = userSubcollection;
 
-    return userSubcollection;
-  }
+  //   return userSubcollection;
+  // }
 
   // void setAdminUserData() async {
   //   var status = await OneSignal.shared.getDeviceState();
@@ -116,7 +116,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final Future<CollectionReference<Map<String, dynamic>>> f =  getSubColl();
+    // final Future<CollectionReference<Map<String, dynamic>>> f =  getSubColl();
     return Scaffold(
       body: _selectedPageIndex == 0
           ? NewRecommendScreen()

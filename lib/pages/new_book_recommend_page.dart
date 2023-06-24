@@ -1,8 +1,13 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:http/http.dart' as http;
 
 class NewRecommendScreen extends StatefulWidget {
   const NewRecommendScreen({super.key});
@@ -12,11 +17,20 @@ class NewRecommendScreen extends StatefulWidget {
 }
 
 class _NewRecommendScreenState extends State<NewRecommendScreen> {
+  late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
   void setUpPushNotification() async {
     final fcm = FirebaseMessaging.instance;
 
     // final notoficationSettings =
-    await fcm.requestPermission();
+    await fcm.requestPermission(
+        alert: true,
+        announcement: true,
+        badge: true,
+        carPlay: false,
+        criticalAlert: false,
+        provisional: false,
+        sound: true);
 
     final token = await fcm.getToken();
     print(token);
@@ -46,6 +60,40 @@ class _NewRecommendScreenState extends State<NewRecommendScreen> {
   void initState() {
     super.initState();
     setUpPushNotification();
+    initInfo();
+  }
+
+  initInfo() {
+    var androidInitialize =
+        const AndroidInitializationSettings('@mipmap/ic_launcher');
+    // var iOSInitialize = const IOSInitializationSettings();
+    var initializeSettings = InitializationSettings(android: androidInitialize);
+
+    flutterLocalNotificationsPlugin.initialize(
+      initializeSettings,
+    );
+
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
+      BigTextStyleInformation bigTextStyleInformation = BigTextStyleInformation(
+          message.notification!.body.toString(),
+          htmlFormatBigText: true,
+          contentTitle: message.notification!.title.toString(),
+          htmlFormatContentTitle: true);
+
+      AndroidNotificationDetails androidPlatformChannelSpecifics =
+          AndroidNotificationDetails(
+              'cse-book-recommendation', 'cse-book-recommendation',
+              importance: Importance.high,
+              styleInformation: bigTextStyleInformation,
+              priority: Priority.high,
+              playSound: false);
+      NotificationDetails platformChannelSpecifics =
+          NotificationDetails(android: androidPlatformChannelSpecifics);
+
+      await flutterLocalNotificationsPlugin.show(0, message.notification?.title,
+          message.notification?.body, platformChannelSpecifics,
+          payload: message.data['title']);
+    });
   }
 
   var _isSubmitting = false;
@@ -104,6 +152,50 @@ class _NewRecommendScreenState extends State<NewRecommendScreen> {
     super.dispose();
   }
 
+  void sendPushMessage(String token, String title, String body) async {
+    try {
+      print('pppppppppppppppppppppppppppppp');
+      final response = await http.post(
+        Uri.parse('http://fcm.googleapis.com/fcm/send'),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization':
+              'key=AAAATLGdHTw:APA91bFjtQy_zE9_MwNLCbjGROo-8Qtk8DXetJXFypQKhLDp2XYgT87NB22c5-49vG7tIF4osjvj9hVGL14qdCSx0x0NAXmmhK0hMpqUXsBvzM9g-WUaT4xzuvERsdZ0gE-kBJ1Y-T3O'
+        },
+        body: jsonEncode(
+          <String, dynamic>{
+            'priority': 'high',
+            'data': <String, dynamic>{
+              'click_action': 'FLUTTER_NOTIFICATION_CLICK',
+              'status': 'done',
+              'body': body,
+              'title': title
+            },
+            "notification": <String, dynamic>{
+              "title": title,
+              "body": body,
+              "android_channel_id": "cse-book-recommendation"
+            },
+            'to': token,
+          },
+        ),
+      );
+      print(response.statusCode);
+      print('pppppppppppppppppppppppppppppp');
+    } catch (error) {
+      if (kDebugMode) {
+        print('error push notification');
+        showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                content: Text("Server Down Couldn't send Notifcation !!"),
+              );
+            });
+      }
+    }
+  }
+
   Future _submit(
       {required String courseName,
       required String newBook,
@@ -129,7 +221,7 @@ class _NewRecommendScreenState extends State<NewRecommendScreen> {
       return;
     }
 
-    await FirebaseFirestore.instance.collection('NewBook').add({
+    await FirebaseFirestore.instance.collection('newbook').add({
       'courseCode&No': courseName,
       'bookName': newBook,
       'authorName': authorName,
@@ -141,6 +233,8 @@ class _NewRecommendScreenState extends State<NewRecommendScreen> {
       'userEmail': facultyEmail,
       'isAproved': false
     });
+
+    String _body = facultyName;
 
     FocusScope.of(context).unfocus();
     _newBookNameController.clear();
@@ -158,6 +252,14 @@ class _NewRecommendScreenState extends State<NewRecommendScreen> {
             content: Text("New Book Recommended !!"),
           );
         });
+
+    DocumentSnapshot snapshot =
+        await FirebaseFirestore.instance.collection('fcm').doc('admin').get();
+
+    String token = snapshot['token'];
+    print(token);
+
+    sendPushMessage(token, 'New Recommendation', 'from ${_body}');
 
     // setState(() {
     //   _isSubmitting = false;

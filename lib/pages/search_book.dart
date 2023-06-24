@@ -91,7 +91,7 @@ class _SearchPageState extends State<SearchPage> {
             )
           : ListView.builder(
               itemCount: _books.length,
-              itemBuilder: (context, index) {
+              itemBuilder: (context, index) { 
                 final book = _books[index];
 
                 return GestureDetector(
