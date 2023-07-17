@@ -186,7 +186,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   );
                 }
 
-                return ListView.builder(
+                return ListView.builder( 
                   itemCount: loadedBooks.length,
                   itemBuilder: (ctx, index) {
                     final book = loadedBooks[index].data();

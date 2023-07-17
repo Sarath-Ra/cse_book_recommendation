@@ -55,28 +55,7 @@ class _MyRecommendBookPageState extends State<MyRecommendBookPage> {
               icon: Icon(Icons.exit_to_app, color: Colors.amber))
         ],
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(
-            height: 30,
-          ),
-          Row(
-            children: [
-              SizedBox(
-                width: 20,
-              ),
-              const Text(
-                "My Recommendations",
-                style: TextStyle(fontSize: 30, fontWeight: FontWeight.w400),
-              ),
-            ],
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          Expanded(
-            child: StreamBuilder(
+      body: StreamBuilder(
               stream: FirebaseFirestore.instance
                   .collection('newbook')
                   .orderBy('createdAt', descending: true)
@@ -166,9 +145,7 @@ class _MyRecommendBookPageState extends State<MyRecommendBookPage> {
                 );
               },
             ),
-          ),
-        ],
-      ),
+        
     );
   }
 }
